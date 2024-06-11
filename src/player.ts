@@ -10,6 +10,7 @@ type keys = {
 	left: boolean;
 	right: boolean;
 	dash: boolean;
+	reload: boolean;
 };
 
 export class Player extends Sprite {
@@ -42,7 +43,8 @@ export class Player extends Sprite {
 	};
 
 	shooting: boolean;
-
+	isReloading: boolean;
+	currentReloadTime: number;
 	constructor({
 		collisionBlock = [],
 		imageSrc,
@@ -93,6 +95,8 @@ export class Player extends Sprite {
 		};
 
 		this.shooting = false;
+		this.isReloading = false;
+		this.currentReloadTime = Player.ammo.currentAmmod
 	}
 
 	drawRect(ctx: CanvasRenderingContext2D) {
@@ -138,6 +142,10 @@ export class Player extends Sprite {
 		Player.projectileArray.forEach((proj) => {
 			proj.update(this);
 		});
+
+		if (this.isReloading) {
+			this.reload();
+		}
 	}
 
 	incremenetDashing() {
@@ -287,7 +295,7 @@ export class Player extends Sprite {
 		}
 
 		if (keys.dash && this.dash.available) {
-			if (this.dash.delay == this.dash.cooldown) {
+			if (this.dash.delay === this.dash.cooldown) {
 				keys.dash = false;
 				this.dash.delay = 0;
 
@@ -311,6 +319,11 @@ export class Player extends Sprite {
 				this.dash.available = false;
 			} else keys.dash = false;
 		}
+
+		if (keys.reload && !this.isReloading) {
+			keys.reload = false;
+			this.isReloading = true;
+		}
 	}
 
 	takeDamage(damage: number) {
@@ -328,10 +341,12 @@ export class Player extends Sprite {
 		projectile.getCursorPosition(this);
 	}
 
-		static ammo = {
-			maxAmmo: 30,
-			currentAmmo: 30,
-		};
+	static ammo = {
+		maxAmmo: 30,
+		currentAmmo: 2,
+		reloadTime: 100,
+		maxReloadTime: 100,
+	};
 
 	checkAmmo(isItZero: boolean = false) {
 		if (!isItZero) return Player.ammo.currentAmmo;
@@ -347,8 +362,30 @@ export class Player extends Sprite {
 
 	static projectileArray = [];
 	shoot() {
-		if (Player.ammo.currentAmmo <= 0) return;
+		if (Player.ammo.currentAmmo <= 0 || this.isReloading) return;
 		Player.decreaseAmmo();
 		projectile.shoot(Player.projectileArray);
+	}
+
+	reload() {
+		if (Player.ammo.currentAmmo === Player.ammo.maxAmmo || !this.isReloading) {
+			this.isReloading = false;
+			return;
+		}
+
+		this.currentReloadTime = Player.ammo.reloadTime
+
+		if (0 === Player.ammo.reloadTime) {
+			Player.ammo.currentAmmo = Player.ammo.maxAmmo;
+			Player.ammo.reloadTime = Player.ammo.maxReloadTime;
+			this.isReloading = false;
+			this.currentReloadTime = Player.ammo.reloadTime
+
+		}
+
+		if (0 < Player.ammo.reloadTime && this.isReloading) {
+			Player.ammo.reloadTime -= 1;
+			this.isReloading = true;
+		}
 	}
 }

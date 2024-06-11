@@ -78,17 +78,8 @@ body {
 .ammo-display {
   display: flex;
   align-items: center;
-  flex-direction: column;
-  justify-content: center;
   font-size: 20px;
-  /* margin-top: 0px; */
-  width: 160px;
-  background-color: #242424;
-  border-radius: 0 0 10px 0;
-  border:  2px solid #202020;
-  padding: 5px;
-  height: 25px;
-  transition: height .5s ease-in;
+  margin-top: 10px;
 }
 
 .ammo-icon {
@@ -99,15 +90,15 @@ body {
 
 @keyframes ammo_intro {
   from {
-    transform: scale(1) translateX(-40px);
+    transform: scale(1) translateX(0);
   }
 
   50% {
-    transform: scale(1) translateX(25px);
+    transform: scale(1) translateX(20px);
   }
 
   to {
-    transform: scale(1.1) translateX(0px);
+    transform: scale(1.1) translateX(20px);
   }
 }
 
@@ -124,25 +115,12 @@ body {
 
 #ammo-count {
   font-weight: bold;
-  transform:  scale(1.1) translateX(0px);
-  animation: ammo_intro 1s  cubic-bezier(.28,-0.2,.31,.96) 1;
+  transform:  scale(1.1) translateX(20px);
+  animation: ammo_intro .5s  cubic-bezier(.28,-0.2,.31,.96) 1;
   transition: color .3s ease;
-  z-index: 1;
 }
 
 .reload {
   /* color: red; */
-  animation: ammo_reload 1s .6s ease infinite;
+  animation: ammo_reload .5s .6s ease infinite;
 }
-
-.reload-bar-inner {
-  width: 100%;
-  height: 10px;
-  background-color: rgb(255, 255, 255);
-}
-
-/* .reload-bar-inner {
-  width: 50%;
-  height: 10px;
-  background-color: #fff;
-} */

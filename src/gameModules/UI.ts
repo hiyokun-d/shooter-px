@@ -24,9 +24,8 @@ export class UI {
 <div class="stamina-bar-inner" id="stamina-bar-inner"></div>
 </div>
 
-       <div class="ammo-display" id="ammo-display">
-	   <span id="ammo-count">Ammo can't be detected!</span>
-	   <div class="reload-bar-inner" id="reload-bar-inner"></div>
+       <div class="ammo-display">
+          <span id="ammo-count">Ammo can't be detected!</span>
         </div>
 `;
 
@@ -79,9 +78,6 @@ export class UI {
 	}
 	updateAmmo() {
 		const ammoCount = document.getElementById("ammo-count");
-		const ammoDisplay = document.getElementById("ammo-display");
-		const ammoBar = document.getElementById("reload-bar-inner");
-
 		if (!ammoCount) return;
 
 		if (
@@ -89,58 +85,29 @@ export class UI {
 			Player.ammo.currentAmmo !== undefined &&
 			Player.ammo.maxAmmo !== undefined
 		) {
-			const formatAmmoCount = (count: number) => {
-				return count < 10 ? `0${count}` : count;
-			};
-
 			ammoCount.textContent = this.player.checkAmmo(true)
 				? `reload / ${Player.ammo.maxAmmo}`
-				: `${formatAmmoCount(Player.ammo.currentAmmo)} / ${formatAmmoCount(
-						Player.ammo.maxAmmo
-				  )}`;
-
-			if (
-				this.player.isReloading ||
-				ammoDisplay?.classList.contains("reload")
-			) {
-				gsap.to(ammoDisplay, {
-					height: 45,
-					duration: 0.05,
-					ease: "back",
-				});
-				
-				gsap.to(ammoBar, {
-					width: this.player.currentReloadTime,
-					duration: 0.5,
-					background: "#fff",
-				})
-			} else {
-				gsap.to(ammoDisplay, {
-					height: 25,
-					duration: 0.1,
-					// delay: 0.5
-				});
-			}
+				: `${Player.ammo.currentAmmo} / ${Player.ammo.maxAmmo}`;
 
 			if (!ammoCount.textContent.includes("reload")) {
-				ammoCount.parentElement?.classList.remove("reload");
-				if (this.player.shooting && !this.player.isReloading) {
+        ammoCount.parentElement?.classList.remove("reload");
+				if (this.player.shooting) {
 					this.player.shooting = false;
 					gsap.to(ammoCount, {
-						transform: "rotate(-20deg) translate(-25px)",
+						transform: "rotate(-20deg) translate(-10px)",
 						yoyoEase: true,
-						duration: 0.4,
+						duration: 0.2,
 						ease: "bounce.inOut",
-						// delay: 0.3,
+						// delay: 1,
 						onComplete() {
 							gsap.to(ammoCount, {
 								transform: "rotate(0deg)",
 								onComplete() {
 									gsap.to(ammoCount, {
-										transform: "rotate(0deg) translate(0px)",
-										duration: 0.3,
-										ease: "bounce",
-										delay: 0.2,
+										transform: "rotate(0deg) translate(10px)",
+                    duration: 0.3,
+                    ease: "bounce",
+                    delay: 0.2
 									});
 								},
 							});
@@ -148,7 +115,7 @@ export class UI {
 					});
 				}
 			} else {
-				ammoCount.parentElement?.classList.add("reload");
+        ammoCount.parentElement?.classList.add("reload")
 			}
 		} else {
 			ammoCount.textContent = "Ammo Can't be detected";

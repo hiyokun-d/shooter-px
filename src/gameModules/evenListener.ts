@@ -7,7 +7,6 @@ let keys = {
 	right: false,
 	left: false,
 	dash: false,
-	reload: false,
 };
 
 addEventListener("keydown", (e) => {
@@ -30,10 +29,6 @@ addEventListener("keydown", (e) => {
 
 	if (e.keyCode == 81 && !keys.dash) {
 		keys.dash = true;
-	}
-
-	if (e.keyCode == 82 && !keys.reload) {
-		keys.reload = true;
 	}
 });
 

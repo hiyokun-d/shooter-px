@@ -32,29 +32,46 @@ let ui = new UI()
 
 ui.draw()
 function game() {
-	canvas.width = innerWidth;
-	canvas.height = innerHeight;
+  canvas.width = innerWidth;
+  canvas.height = innerHeight;
 
-	const map = resources.images.map;
-	if (map.isLoaded) {
-		ctx?.drawImage(map.image, 0, 0, canvas.width, canvas.height);
-	}
+  const map = resources.images.map
+  if (map.isLoaded) {
+    ctx?.drawImage(map.image, 0, 0, canvas.width, canvas.height)
+  }
 
-	collisionBlock.forEach((key) => key.draw(ctx));
+  collisionBlock.forEach(key => key.draw(ctx))
 
-	requestAnimationFrame(game);
-	player.handleEventKeys(keys);
+  requestAnimationFrame(game)
+  player.handleEventKeys(keys)
 
-	if (player.loaded) {
-		player.draw(ctx);
-		player.drawRect(ctx);
-		player.update();
-	}
+  if (player.loaded) {
+    player.draw(ctx)
+    player.drawRect(ctx)
+    player.update()
+  }
 
-	enemy.draw(ctx);
-	enemy.update();
+  enemy.draw(ctx)
+  enemy.update()
 
-	ui.update();
+  // TEMP: CURSOR
+  // TODO: MOVE THIS INTO PLAYER CONSTRUCTOR so we can use it in another situation
+  // TODO: Make a collision detection
+  // projectile.getCursorPosition(player)
+  // projectile.draw(ctx)
+
+  // projectileArrayTest.forEach(proj => {
+  //   proj.draw(ctx)
+  //   proj.update(player)
+  // })
+
+  ui.update()
 }
 
-game();
+game()
+
+// function shoot() {
+//   projectileTest.shoot(projectileArrayTest)
+// }
+
+// addEventListener("click", player.shoot)

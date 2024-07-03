@@ -9,7 +9,7 @@ import * as data from "./collisionManagement/collisionData.json"
 import { parse2D, createObjectsFrom2D } from './collisionManagement/parserArray'
 import { enemies_melee } from './enemies/melee'
 import { UI } from './gameModules/UI'
-  
+
 const canvas: HTMLCanvasElement = document.getElementById("canvas")
 const ctx: CanvasRenderingContext2D | null = canvas?.getContext("2d")
 
@@ -32,29 +32,29 @@ let ui = new UI()
 
 ui.draw()
 function game() {
-	canvas.width = innerWidth;
-	canvas.height = innerHeight;
+  canvas.width = innerWidth;
+  canvas.height = innerHeight;
 
-	const map = resources.images.map;
-	if (map.isLoaded) {
-		ctx?.drawImage(map.image, 0, 0, canvas.width, canvas.height);
-	}
+  const map = resources.images.map;
+  if (map.isLoaded) {
+    ctx?.drawImage(map.image, 0, 0, canvas.width, canvas.height);
+  }
 
-	collisionBlock.forEach((key) => key.draw(ctx));
+  collisionBlock.forEach((key) => key.draw(ctx));
 
-	requestAnimationFrame(game);
-	player.handleEventKeys(keys);
+  requestAnimationFrame(game);
+  player.handleEventKeys(keys);
 
-	if (player.loaded) {
-		player.draw(ctx);
-		player.drawRect(ctx);
-		player.update();
-	}
+  if (player.loaded) {
+    player.draw(ctx);
+    player.drawRect(ctx);
+    player.update();
+  }
 
-	enemy.draw(ctx);
-	enemy.update();
+  enemy.draw(ctx);
+  enemy.update();
 
-	ui.update();
+  ui.update();
 }
 
 game();

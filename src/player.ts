@@ -56,7 +56,6 @@ export class Player extends Sprite {
     animations,
     loop,
     animationID,
-    currentID,
   }) {
     super({ imageSrc, frameRate, animations, loop, animationID, frameBuffer });
     this.position = {
@@ -66,8 +65,8 @@ export class Player extends Sprite {
 
     this.speed = -2;
 
-    this.width = 65; // px
-    this.height = 55; // px
+    this.width = 32; // px
+    this.height = 32; // px
 
     this.collisionBlocks = collisionBlock;
 
@@ -120,7 +119,7 @@ export class Player extends Sprite {
       projectile.draw(ctx);
 
       Player.projectileArray.forEach((proj) => {
-        proj.draw(ctx);
+        proj.drawCircle(ctx);
       });
     }
   }
@@ -153,7 +152,6 @@ export class Player extends Sprite {
     }
 
     if (this.health.health !== this.health.maxHealth && !this.isTakeDamage) {
-      console.log("helo")
       this.startHealTimer()
     }
   }

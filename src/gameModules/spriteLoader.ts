@@ -19,6 +19,10 @@ export class Sprite {
   autoplay: boolean
   currentAnimation: any
   animationID: number
+  angleImage: number
+  rotationObject: boolean
+  onComplete: Function
+  isCompleted: boolean
 
   constructor({ position, imageSrc, animations, frameRate = 1, animationID = 0, frameBuffer = 3, loop = true, autoplay = true }) {
     this.position = position
@@ -27,9 +31,10 @@ export class Sprite {
 
     this.image.onload = () => {
       this.loaded = true
-      this.width = 32
-      this.height = 32
+      console.log("IT DOES!")
     }
+
+    this.onComplete
 
     this.image.src = imageSrc
     this.frameRate = frameRate
@@ -41,6 +46,9 @@ export class Sprite {
     this.autoplay = autoplay
     this.currentAnimation;
     this.animationID = animationID
+    this.angleImage = 0
+    this.rotationObject = false
+    this.isCompleted = false
 
     if (this.animations) {
       for (let key in this.animations) {
@@ -62,7 +70,24 @@ export class Sprite {
       height: this.height
     }
 
-    ctx.drawImage(this.image, cropBox.position.x, cropBox.position.y, cropBox.width, cropBox.height, this.position.x, this.position.y, this.width, this.height)
+    ctx.save(); // Save the current context state
+
+    if (this.rotationObject) {
+      ctx.translate(this.position.x, this.position.y); // Move the context origin to the center of the image
+      ctx.rotate((this.angleImage * Math.PI) / 180); // Rotate the context by the angle in radians
+    } else {
+      ctx.translate(this.position.x + this.width / 2, this.position.y + this.height / 2); // Move the context origin to the center of the image
+      ctx.rotate((this.angleImage * Math.PI) / 180); // Rotate the context by the angle in radians
+    }
+
+    ctx.drawImage(
+      this.image,
+      cropBox.position.x, cropBox.position.y, cropBox.width, cropBox.height,
+      -this.width / 2, -this.height / 2, // Adjust the drawing position to account for the translation
+      this.width, this.height
+    );
+
+    ctx.restore(); // Restore the context to its original state
     this.updateFrames()
   }
 
@@ -71,18 +96,26 @@ export class Sprite {
   }
 
   updateFrames() {
+    let animationTimeout;
     if (!this.autoplay) return;
     this.elapsedFrame++
 
     if (this.elapsedFrame % this.frameBuffer === 0) {
-      if (this.currentFrame < this.frameRate - 1) this.currentFrame++;
+      if (this.currentFrame < this.frameRate - 1) {
+        this.currentFrame++
+
+        animationTimeout = setTimeout(() => {
+          this.isCompleted = true
+        }, 40)
+      }
       else if (this.loop) this.currentFrame = 0
     }
 
-    if (this.currentAnimation?.onComplete) {
-      if (this.currentFrame === this.frameRate - 1 && !this.currentAnimation.isActive) {
-        this.currentAnimation.onComplete()
-        this.currentAnimation.isActive = true
+    if (this.onComplete && this.isCompleted) {
+      if (this.currentFrame === this.frameRate - 1) {
+        this.onComplete()
+        this.isCompleted = false
+        clearTimeout(animationTimeout)
       }
     }
   }

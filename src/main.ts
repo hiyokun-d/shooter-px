@@ -57,4 +57,6 @@ function game() {
   ui.update();
 }
 
+console.log(projectile)
+
 game();

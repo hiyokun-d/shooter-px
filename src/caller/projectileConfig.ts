@@ -18,5 +18,18 @@ export const projectile = new Projectile({
       loop: false
     },
 
+    3: { // LEFT OUT OF AMMO
+      id: 2,
+      frameRate: 2,
+      frameBuffer: 5,
+      loop: false
+    },
+
+    4: { // RIGHT OUT OF AMMO
+      id: 3,
+      frameRate: 2,
+      frameBuffer: 5,
+      loop: false
+    }
   }
 });

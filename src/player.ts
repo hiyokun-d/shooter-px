@@ -117,10 +117,14 @@ export class Player extends Sprite {
       ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
 
       projectile.draw(ctx);
+      // projectile.drawCircle(ctx)
 
-      Player.projectileArray.forEach((proj) => {
-        proj.drawCircle(ctx);
-      });
+      for (let i = 0; i < Player.projectileArray.length; i++) {
+        const proj = Player.projectileArray[i]
+
+        // proj.drawCircle(ctx);
+        proj.draw(ctx)
+      }
     }
   }
 
@@ -418,7 +422,6 @@ export class Player extends Sprite {
       this.isReloading = false;
       return;
     }
-    const currentAngleImage = projectile.angleImage
 
     this.currentReloadTime = Player.ammo.reloadTime
 

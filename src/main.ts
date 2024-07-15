@@ -10,7 +10,7 @@ import { parse2D, createObjectsFrom2D } from './collisionManagement/parserArray'
 import { enemies_melee } from './enemies/melee'
 import { UI } from './gameModules/UI'
 
-const canvas: HTMLCanvasElement = document.getElementById("canvas")
+export const canvas: HTMLCanvasElement = document.getElementById("canvas")
 const ctx: CanvasRenderingContext2D | null = canvas?.getContext("2d")
 
 addEventListener("resize", () => {

@@ -31,10 +31,9 @@ export class Sprite {
 
     this.image.onload = () => {
       this.loaded = true
-      console.log("IT DOES!")
     }
 
-    this.onComplete
+    this.onComplete = () => { return }
 
     this.image.src = imageSrc
     this.frameRate = frameRate

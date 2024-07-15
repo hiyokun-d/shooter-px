@@ -106,7 +106,7 @@ export class Sprite {
 
         animationTimeout = setTimeout(() => {
           this.isCompleted = true
-        }, 40)
+        }, 50)
       }
       else if (this.loop) this.currentFrame = 0
     }

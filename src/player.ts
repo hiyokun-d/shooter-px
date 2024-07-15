@@ -418,6 +418,7 @@ export class Player extends Sprite {
       this.isReloading = false;
       return;
     }
+    const currentAngleImage = projectile.angleImage
 
     this.currentReloadTime = Player.ammo.reloadTime
 
@@ -426,12 +427,17 @@ export class Player extends Sprite {
       Player.ammo.reloadTime = Player.ammo.maxReloadTime;
       this.isReloading = false;
       this.currentReloadTime = Player.ammo.reloadTime
+      projectile.updateAngleImage = true
 
     }
 
     if (0 < Player.ammo.reloadTime && this.isReloading) {
       Player.ammo.reloadTime -= 1;
       this.isReloading = true;
+      projectile.updateAngleImage = false
+      if (projectile.gunPosition === "right") {
+        projectile.angleImage += 15
+      } else projectile.angleImage -= 15
     }
   }
 }

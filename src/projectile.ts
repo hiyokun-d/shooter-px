@@ -10,6 +10,9 @@ export class Projectile extends Sprite {
   angle: number;
   initialDirection: { x: number, y: number };
   player: any; // Add this to store the player object
+  gunPosition: "left" | "right"
+  doSomeDamage: boolean
+  updateAngleImage: boolean
 
   constructor({
     imageSrc,
@@ -32,6 +35,10 @@ export class Projectile extends Sprite {
     this.autoplay = false
     this.rotationObject = true
     this.loop = false
+    this.gunPosition = "left"
+
+    this.doSomeDamage = false
+    this.updateAngleImage = true
   }
 
   initializeMouse(Mouse: any) {
@@ -68,7 +75,17 @@ export class Projectile extends Sprite {
     this.position.x = player.position.x + offsetX;
     this.position.y = player.position.y + offsetY;
 
-    this.angleImage = (this.angle * 180) / Math.PI;
+    if (this.updateAngleImage) {
+      this.angleImage = (this.angle * 180) / Math.PI;
+
+      if (this.angleImage >= 95 || this.angleImage <= -92) {
+        this.switchSprite(2)
+        this.gunPosition = "left"
+      } else {
+        this.switchSprite(1)
+        this.gunPosition = "right"
+      }
+    }
   }
 
   update() {
@@ -101,8 +118,8 @@ export class Projectile extends Sprite {
     newProjectile.height = 32
     newProjectile.angle = this.angleImage;
     newProjectile.rotationObject = true
+    newProjectile.doSomeDamage = true
 
-    console.log(newProjectile)
 
     tempArray.push(newProjectile);
 

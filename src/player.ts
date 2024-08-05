@@ -85,7 +85,7 @@ export class Player extends Sprite {
     };
 
     this.dash = {
-      speed: 15,
+      speed: 25,
       cooldown: 100,
       delay: 0,
       available: false,
@@ -122,7 +122,7 @@ export class Player extends Sprite {
       for (let i = 0; i < Player.projectileArray.length; i++) {
         const proj = Player.projectileArray[i]
 
-        // proj.drawCircle(ctx);
+        proj.drawCircle(ctx);
         proj.draw(ctx)
       }
     }
@@ -147,8 +147,13 @@ export class Player extends Sprite {
 
     this.updatePlayerPosition();
 
-    Player.projectileArray.forEach((proj) => {
-      proj.update(this);
+    Player.projectileArray.forEach((proj, i) => {
+      proj.collisionBlocks = this.collisionBlocks
+      proj.update();
+
+      if (proj.checkForHorizontalCollision(true) || proj.checkForVerticalCollision(true)) {
+        Player.projectileArray.splice(i, 1)
+      }
     });
 
     if (this.isReloading) {
@@ -342,6 +347,8 @@ export class Player extends Sprite {
     this.health.health -= damage || 10;
     this.isTakeDamage = true
 
+    if (this.health.health <= 0) return this.health.health = 0
+
     if (this.healTimeout) {
       clearTimeout(this.healTimeout)
     }
@@ -353,7 +360,7 @@ export class Player extends Sprite {
     this.healTimeout = setTimeout(() => {
       this.heal(10);
       this.isTakeDamage = false;
-    }, 5000)
+    }, 5500)
   }
 
   checkHealth(isItZero?: boolean) {
@@ -364,6 +371,7 @@ export class Player extends Sprite {
   }
 
   heal(heal: number) {
+    if (this.health.health <= 0) return;
     if (this.isTakeDamage) {
       clearTimeout(this.healTimeout)
       this.startHealTimer();
@@ -395,6 +403,7 @@ export class Player extends Sprite {
     currentAmmo: 2,
     reloadTime: 100,
     maxReloadTime: 100,
+    damage: 10
   };
 
   checkAmmo(isItZero: boolean = false) {

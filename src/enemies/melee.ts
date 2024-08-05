@@ -1,6 +1,80 @@
+import { projectile } from "../caller/projectileConfig"
 import { CollisionBlock } from "../gameModules/collision"
+import { Sprite } from "../gameModules/spriteLoader"
+import { Player } from "../player"
+import { Projectile } from "../projectile"
 
-export class enemies_melee {
+class HitEffect extends Sprite {
+  position: {
+    x: number, y: number
+  }
+
+  width: number
+  height: number
+
+  show: boolean
+  showTimeout: any
+  constructor() {
+    super({})
+    this.image.src = "./hitEffect.png"
+
+    this.position = {
+      x: 120,
+      y: 120,
+    }
+
+    this.width = 62
+    this.height = 70
+
+    this.show = false
+    this.showTimeout;
+
+    this.animations = {
+      1: {
+        id: 0,
+        frameRate: 9,
+        frameBuffer: 6,
+        loop: false,
+      },
+      2: {
+        id: 1,
+        frameRate: 9,
+        frameBuffer: 6,
+        loop: false,
+      }
+    }
+    this.frameRate = 10
+    this.frameBuffer = 5
+    this.loop = true
+  }
+
+
+  drawTemp(ctx: CanvasRenderingContext2D) {
+    if (ctx) {
+      ctx.fillStyle = "red"
+      if (this.show)
+        ctx.fillRect(this.position.x, this.position.y, this.width, this.height)
+    }
+  }
+
+
+  hideHitEffect() {
+    if (this.showTimeout) {
+      clearTimeout(this.showTimeout);
+
+      if (this.currentFrame > 1) {
+        this.currentFrame = 0
+      }
+    }
+
+    this.show = true
+    if (this.show) {
+      this.showTimeout = setTimeout(() => this.show = false, 1000);
+    }
+  }
+}
+
+export class enemies_melee extends Sprite {
   position: {
     x: number
     y: number
@@ -18,8 +92,8 @@ export class enemies_melee {
     height: number
   }
 
-  width: number
-  height: number
+  collisionWidth: number
+  collisionHeight: number
 
   player: Player
   collisionBlocks: Array<CollisionBlock>
@@ -32,21 +106,65 @@ export class enemies_melee {
   damage: number
   lastAttackTime: number
   attackCooldown: number
+  canMove: boolean
+  health: number
 
-  constructor({ player, CollisionBlocks = [] }) {
-    this.position = {
-      x: 130,
-      y: 200
+  width: number
+  height: number;
+
+  hiteffect: HitEffect
+  constructor({ player, CollisionBlocks = [], Position = { x: 160, y: 170 } }: { player: Player, CollisionBlocks: Array<any>, Position: { x: number, y: number } }) {
+    super({});
+
+    this.image.src = "./ninja.png"
+    this.loop = true
+    this.animations = {
+      // WALK RIGHT
+      1: {
+        id: 0,
+        frameBuffer: 4,
+        frameRate: 3,
+        loop: true
+      },
+
+      // WALK LEFT
+      2: {
+        id: 1,
+        frameBuffer: 4,
+        frameRate: 3,
+        loop: true
+      }
     }
 
-    this.damage = 10
+    this.custom_position = true
+    this.custom = {
+      position: {
+        x: 5,
+        y: 5
+      }
+    }
+    this.width = 13 * 2; // px
+    this.height = 14 * 2; // px
 
-    this.width = 50
-    this.height = 50
+    // this.position = {
+    //   x: 160,
+    //   y: 170
+    // }
+
+    this.position = {
+      x: Position.x,
+      y: Position.y
+    }
+    this.damage = (Math.random() * 5) + 5
+
+    this.collisionWidth = 60
+    this.collisionHeight = 60
+
+    this.health = (Math.random() * 5) + 60
 
     this.collision = {
-      centerX: this.position.x + this.width / 2,
-      centerY: this.position.y + this.height / 2,
+      centerX: this.position.x + this.collisionWidth / 2,
+      centerY: this.position.y + this.collisionHeight / 2,
       radius: 40, // Example radius, adjust as needed
     };
 
@@ -67,15 +185,18 @@ export class enemies_melee {
     this.player = player
     this.collisionBlocks = CollisionBlocks
 
-    this.speed = 1
+    this.speed = 0.2
 
     this.attackCooldown = 1000
     this.lastAttackTime = 0
+    this.canMove = false
+
+    this.hiteffect = new HitEffect()
   }
 
-  draw(ctx: CanvasRenderingContext2D) {
-    ctx.fillStyle = "rgba(0, 255, 0)"
-    ctx.fillRect(this.position.x, this.position.y, this.width, this.height)
+  drawCollision(ctx: CanvasRenderingContext2D) {
+    ctx.fillStyle = "rgba(0, 255, 0, 0.5)"
+    ctx.fillRect(this.position.x, this.position.y, this.collisionWidth, this.collisionHeight)
 
     ctx.strokeStyle = "rgba(255, 0, 0, 0.5)";
     ctx.beginPath();
@@ -84,10 +205,15 @@ export class enemies_melee {
 
     ctx.fillStyle = "rgba(0, 0, 255, 0.5)"
     ctx.fillRect(this.hitbox.position.x, this.hitbox.position.y, this.hitbox.width, this.hitbox.height)
+    this.ctx = ctx
   }
 
   update() {
     this.position.x += this.velocity.x;
+
+    if (this.hiteffect.show) {
+      this.hiteffect.draw(this.ctx)
+    }
 
     this.updateHitbox();
     this.checkForHorizontalCollision();
@@ -100,36 +226,116 @@ export class enemies_melee {
     this.checkForCollisionWithPlayer()
 
     this.updateHitbox()
-    //    this.movement()
+    if (this.canMove) {
+      this.movement()
+    }
+
+    this.checkForProjectileCollision()
   }
 
   updateHitbox() {
     this.hitbox = {
       position: {
-        x: this.position.x + this.width / 2 - 10, // INFO: position + collision.width / 2 - hitbox.width / 2
-        y: this.position.y + this.height / 2 - 10
+        x: this.position.x + this.collisionWidth / 2 - 12, // INFO: position + collision.width / 2 - hitbox.width / 2
+        y: this.position.y + this.collisionHeight / 2 - 12
       },
-      width: 20,
-      height: 20
+      width: 25,
+      height: 30
     }
   }
 
+  switchSprite(id: number) {
+    if (!this.animations[id]) {
+      console.error(`Animation with ID ${id} not found or it doesn't exist`);
+      return;
+    }
+    this.frameRate = this.animations[id].frameRate;
+    this.frameBuffer = this.animations[id].frameBuffer;
+    this.animationID = this.animations[id].id;
+  }
+
   updatePlayerPosition() {
-    // Calculate the direction vector from enemy to player
     const directionX = this.player.position.x - this.position.x;
     const directionY = this.player.position.y - this.position.y;
 
-    // Calculate angle to rotate collision box
     const angle = Math.atan2(directionY, directionX);
 
-    // Update collision box position and rotation
-    this.collision.centerX = this.position.x + this.width / 2 + Math.cos(angle) * this.collision.radius;
-    this.collision.centerY = this.position.y + this.height / 2 + Math.sin(angle) * this.collision.radius;
+    this.collision.centerX = this.position.x + this.collisionWidth / 2 + Math.cos(angle) * this.collision.radius;
+    this.collision.centerY = this.position.y + this.collisionHeight / 2 + Math.sin(angle) * this.collision.radius;
+  }
+
+  updateHitEffectPosition() {
+    const angle = Math.atan2(this.player.position.y - this.hitbox.position.y, this.player.position.x - this.hitbox.position.x);
+    const distanceFromPlayer = 25;
+    const offsetX = Math.cos(angle) * distanceFromPlayer;
+    const offsetY = Math.sin(angle) * distanceFromPlayer;
+
+    this.hiteffect.position.x = this.hitbox.position.x + this.hitbox.width / 2 + offsetX - this.hiteffect.width / 2;
+    this.hiteffect.position.y = this.hitbox.position.y + this.hitbox.height / 2 + offsetY - this.hiteffect.height / 2;
+  }
+
+  checkForOuterCollisionHorizontal(): boolean {
+    for (let i = 0; i < this.collisionBlocks.length; i++) {
+      const collisionBlock = this.collisionBlocks[i];
+
+      if (
+        this.position.x < collisionBlock.position.x + collisionBlock.width &&
+        this.position.x + this.collisionWidth > collisionBlock.position.x &&
+        this.position.y < collisionBlock.position.y + collisionBlock.height &&
+        this.position.y + this.collisionHeight > collisionBlock.position.y
+      ) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  checkForOuterCollisionVertical(): boolean {
+    for (let i = 0; i < this.collisionBlocks.length; i++) {
+      const collisionBlock = this.collisionBlocks[i];
+
+      if (
+        this.position.y < collisionBlock.position.y + collisionBlock.height &&
+        this.position.y + this.collisionHeight > collisionBlock.position.y &&
+        this.position.x < collisionBlock.position.x + collisionBlock.width &&
+        this.position.x + this.collisionWidth > collisionBlock.position.x
+      ) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  checkForProjectileCollision() {
+    for (let i = 0; i < Player.projectileArray.length; i++) {
+      const projectile = Player.projectileArray[i];
+
+      const circle = {
+        x: projectile.position.x,
+        y: projectile.position.y,
+        radius: projectile.radius
+      }
+
+      let closestX = Math.max(this.hitbox.position.x, Math.min(circle.x, this.hitbox.position.x + this.hitbox.width))
+      let closestY = Math.max(this.hitbox.position.y, Math.min(circle.y, this.hitbox.position.y + this.hitbox.height))
+
+      const distanceX = circle.x - closestX;
+      const distanceY = circle.y - closestY
+      const distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY)
+
+      if (distance < circle.radius) {
+        this.takeDamage()
+        this.health = Math.round(this.health)
+        projectile.deleteProjectile(Player.projectileArray)
+        console.log(this.health)
+      }
+    }
   }
 
   checkForHorizontalCollision() {
     for (let i = 0; i < this.collisionBlocks.length; i++) {
       const collisionBlock = this.collisionBlocks[i]
+
       if (
         this.hitbox.position.x <= collisionBlock.position.x + collisionBlock.width &&
         this.hitbox.position.x + this.hitbox.width >= collisionBlock.position.x &&
@@ -187,7 +393,10 @@ export class enemies_melee {
       this.hitbox.position.y < playerHitbox.position.y + playerHitbox.height &&
       this.hitbox.position.y + this.hitbox.height > playerHitbox.position.y
     ) {
+      this.speed = 0.01
       this.attack()
+    } else {
+      this.speed = 0.1
     }
 
     //INFO: ENEMIES COLLISION DETECT PLAYER??
@@ -221,27 +430,67 @@ export class enemies_melee {
     const currentTime = Date.now()
     if (currentTime - this.lastAttackTime >= this.attackCooldown && this.isPlayerInCircle()) {
       this.updatePlayerPosition()
+      this.updateHitEffectPosition()
+      this.hiteffect.hideHitEffect()
       this.player.takeDamage(this.damage)
       this.lastAttackTime = currentTime
     }
   }
 
   movement() {
-    // Example: Adjust position based on player's position
+    // Adjust velocity based on player position
     if (this.player.position.x < this.position.x) {
-      // Player is to the left of the enemy
-      this.position.x -= this.speed;
-    } else if (this.player.position.x > this.position.x) {
-      // Player is to the right of the enemy
-      this.position.x += this.speed;
+      this.velocity.x -= this.speed;
+      this.switchSprite(2)
+    } else if (this.player.position.x > this.position.x + this.collisionWidth / 2) {
+      this.switchSprite(1)
+      this.velocity.x += this.speed;
     }
 
     if (this.player.position.y < this.position.y) {
-      // Player is above the enemy
-      this.position.y -= this.speed;
+      this.velocity.y -= this.speed;
     } else if (this.player.position.y > this.position.y) {
-      // Player is below the enemy
-      this.position.y += this.speed;
+      this.velocity.y += this.speed;
     }
+
+    // Check for collisions and adjust position
+    if (this.checkForOuterCollisionHorizontal()) {
+      // Try moving left or right
+      if (!this.checkForOuterCollisionOnMove(-this.speed, 0)) {
+        this.velocity.x -= this.speed; // Move left
+      } else if (!this.checkForOuterCollisionOnMove(this.speed, 0)) {
+        this.velocity.x += this.speed; // Move right
+      }
+    }
+
+    if (this.checkForOuterCollisionVertical()) {
+      // Try moving up or down
+      if (!this.checkForOuterCollisionOnMove(0, -this.speed)) {
+        this.velocity.y -= this.speed; // Move up
+      } else if (!this.checkForOuterCollisionOnMove(0, this.speed)) {
+        this.velocity.y += this.speed; // Move down
+      }
+    }
+  }
+
+  checkForOuterCollisionOnMove(deltaX: number, deltaY: number): boolean {
+    for (let i = 0; i < this.collisionBlocks.length; i++) {
+      const collisionBlock = this.collisionBlocks[i];
+      const newX = this.velocity.x + deltaX;
+      const newY = this.velocity.y + deltaY;
+      if (
+        newX < collisionBlock.position.x + collisionBlock.width &&
+        newX + this.collisionWidth > collisionBlock.position.x &&
+        newY < collisionBlock.position.y + collisionBlock.height &&
+        newY + this.collisionHeight > collisionBlock.position.y
+      ) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  takeDamage() {
+    this.health -= Player.ammo.damage;
   }
 }

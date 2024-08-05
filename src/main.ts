@@ -9,6 +9,7 @@ import * as data from "./collisionManagement/collisionData.json"
 import { parse2D, createObjectsFrom2D } from './collisionManagement/parserArray'
 import { enemies_melee } from './enemies/melee'
 import { UI } from './gameModules/UI'
+import { enemiesArray, spawner } from './enemies/spawner.ts'
 
 export const canvas: HTMLCanvasElement = document.getElementById("canvas")
 const ctx: CanvasRenderingContext2D | null = canvas?.getContext("2d")
@@ -18,15 +19,14 @@ addEventListener("resize", () => {
   canvas.height = innerHeight;
 })
 
-//? change the projectile variable cause javascript is sucks and my code is sucks
-let projectileArrayTest: Array<any> = []
 
-let parser = parse2D.call(data.mapBambang)
-let collisionBlock = createObjectsFrom2D(canvas, parser, 924)
+let parser = parse2D.call(data.newMapData)
+//TUTORIAL MAP ID: 924
+//MAIN MAP ID = 73
+export let collisionBlock = createObjectsFrom2D(canvas, parser, 73)
 player.collisionBlocks = collisionBlock
-
-let enemy = new enemies_melee({ player })
-enemy.collisionBlocks = collisionBlock
+// let enemy = new enemies_melee({ player })
+// enemy.collisionBlocks = collisionBlock
 
 let ui = new UI()
 
@@ -45,18 +45,25 @@ function game() {
   requestAnimationFrame(game);
   player.handleEventKeys(keys);
 
+  enemiesArray.forEach(enemy => {
+    enemy.drawCollision(ctx);
+    enemy.draw(ctx)
+    enemy.update();
+    enemy.play()
+    enemy.canMove = true
+  })
+
   if (player.loaded) {
     player.draw(ctx);
     player.drawRect(ctx);
     player.update();
   }
 
-  enemy.draw(ctx);
-  enemy.update();
-
   ui.update();
 }
+// console.log(enemy)
 
 console.log(projectile)
 
 game();
+spawner()

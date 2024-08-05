@@ -1,11 +1,11 @@
 import { CollisionBlock } from "../gameModules/collision"
 
-// INFO!
+// INFO:
 // MAP CONFIG: 
 // map size: 50px (width and height)
 // tile size each: 16px
 
-const parse2D = function() {
+const parse2D = function () {
   const rows: Array<any> = []
   // 50  IS THE MAP TILE PIXEL EACH
   for (let i = 0; i < this.length; i += 50) {
@@ -15,7 +15,7 @@ const parse2D = function() {
   return rows
 }
 
-const createObjectsFrom2D = function(canvas: HTMLCanvasElement, collisionData: number[][], ID: number) {
+const createObjectsFrom2D = function (canvas: HTMLCanvasElement, collisionData: number[][], ID: number) {
   const objects: Array<CollisionBlock> = [];
   const tileSize = 16;
 

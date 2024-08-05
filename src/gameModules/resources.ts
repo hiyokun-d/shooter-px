@@ -4,7 +4,7 @@ class Resources {
 
   constructor() {
     this.toLoad = {
-      map: "/poop.png"
+      map: "/map4.png"
       // Add more resources here if needed
     };
 

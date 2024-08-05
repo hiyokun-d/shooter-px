@@ -4,6 +4,8 @@
 // OR EVEN ADDING A SINGLE COMMENT CAUSE IT WILL BROKE
 // :(
 
+// TODO: STILL DO SOME UPDATE WITH THIS LOADER 
+
 export class Sprite {
   position: { x: number, y: number }
   image: HTMLImageElement
@@ -23,6 +25,8 @@ export class Sprite {
   rotationObject: boolean
   onComplete: Function
   isCompleted: boolean
+  custom_position: boolean
+  custom: object
 
   constructor({ position, imageSrc, animations, frameRate = 1, animationID = 0, frameBuffer = 3, loop = true, autoplay = true }) {
     this.position = position
@@ -34,6 +38,15 @@ export class Sprite {
     }
 
     this.onComplete = () => { return }
+
+    this.custom_position = false
+    
+    this.custom = {
+      position: {
+        x: 0,
+        y: 0
+      }
+    }
 
     this.image.src = imageSrc
     this.frameRate = frameRate
@@ -70,6 +83,23 @@ export class Sprite {
     }
 
     ctx.save(); // Save the current context state
+
+    if(this.custom_position) {
+      if (this.rotationObject) {
+        ctx.translate(this.custom.position.x, this.custom.position.y); // Move the context origin to the center of the image
+        ctx.rotate((this.angleImage * Math.PI) / 180); // Rotate the context by the angle in radians
+      } else {
+        ctx.translate(this.custom.position.x + this.width / 2, this.custom.position.y + this.height / 2); // Move the context origin to the center of the image
+        ctx.rotate((this.angleImage * Math.PI) / 180); // Rotate the context by the angle in radians
+      }
+  
+      ctx.drawImage(
+        this.image,
+        cropBox.position.x, cropBox.position.y, cropBox.width, cropBox.height,
+        -this.width / 2, -this.height / 2, // Adjust the drawing position to account for the translation
+        this.width, this.height
+      );
+    }
 
     if (this.rotationObject) {
       ctx.translate(this.position.x, this.position.y); // Move the context origin to the center of the image
